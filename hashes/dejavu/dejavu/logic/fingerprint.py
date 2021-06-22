@@ -50,7 +50,7 @@ def fingerprint(channel_samples: List[int],
     # Apply log transform since specgram function returns linear array. 0s are excluded to avoid np warning.
     arr2D = 10 * np.log10(arr2D, out=np.zeros_like(arr2D), where=(arr2D != 0))
 
-    local_maxima = get_2D_peaks(arr2D, plot=False, amp_min=amp_min)
+    local_maxima = get_2D_peaks(arr2D, plot=True, amp_min=amp_min)
 
     # return hashes
     return generate_hashes(local_maxima, fan_value=fan_value)
@@ -113,7 +113,7 @@ def get_2D_peaks(arr2D: np.array, plot: bool = False, amp_min: int = DEFAULT_AMP
         # scatter of the peaks
         fig, ax = plt.subplots()
         ax.imshow(arr2D)
-        ax.scatter(times_filter, freqs_filter)
+        # ax.scatter(times_filter, freqs_filter)
         ax.set_xlabel('Time')
         ax.set_ylabel('Frequency')
         ax.set_title("Spectrogram")

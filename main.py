@@ -1,7 +1,7 @@
 from hashes.hashing import hashing
 from parse_CMD import parse_cmd
 from cfg import Examplepath1, Examplepath2, allowDiffFrame, DEFAULT_CONFIG_FILE, num_for_check_if_not_collision, \
-    diffForFirstAndNext, hashes_diff, tenSec, framesInSecond
+    diffForFirstAndNext, hashes_diff, tenSec, framesInSecond, sameCoef
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -229,10 +229,17 @@ def findLast(array, indF, numNeeded):
             indF -= 1
         return indF
 
+def distance(base, sec):
+    dist = 0
+    for letterBase, letterSec in zip(base, sec):
+        if letterBase != letterSec:
+            dist += 1
+
+    return dist
 
 def compareSynth(pathBase=Examplepath1, pathNew=Examplepath2, printGraph=None):
     BasehashesArr, baseTimeArr, audRate = hashing(pathBase,
-                                         DEFAULT_CONFIG_FILE)  # хеширования файлов, сохранения в единый массив
+                                                  DEFAULT_CONFIG_FILE)  # хеширования файлов, сохранения в единый массив
     print('base_hashes array is ready')
     NewhashesArr, newTimeArr, audRateNew = hashing(pathNew, DEFAULT_CONFIG_FILE)
     print('new_hashes array is ready')
@@ -245,12 +252,13 @@ def compareSynth(pathBase=Examplepath1, pathNew=Examplepath2, printGraph=None):
     for i, hash in enumerate(NewhashesArr):
         hashTime = newTimeArr[i]
 
-        if hash in BasehashesArr[
+        for baseHash in BasehashesArr[
                    findFirst(baseTimeArr, i, hashTime - 20): (findLast(baseTimeArr, i, hashTime + 20) + 1)]:
-            diff = 0
-            if i <40000:
-                breakPoint = i
-
+            if distance(baseHash, hash)<len(hash)*sameCoef:
+                diff = 0
+                if i < 40000:
+                    breakPoint = i
+                break
         else:
             diff += 1
 
@@ -258,7 +266,7 @@ def compareSynth(pathBase=Examplepath1, pathNew=Examplepath2, printGraph=None):
 
     print('DIFF array and comparing is ready')
 
-    # print(newTimeArr[7000])
+    print(f'"Секунд" в ролике: {newTimeArr[len(newTimeArr)-1]}')
     if printGraph:
         # print()
         t1 = np.arange(0, len(diffArr), 1)
@@ -269,8 +277,8 @@ def compareSynth(pathBase=Examplepath1, pathNew=Examplepath2, printGraph=None):
         plt.show()
 
     print(f'Точка расхождения(номер кадра): {breakPoint}')
-    print(f'Точка расхождения(~секундах): {newTimeArr[breakPoint]}')
-    print(f'всего времени: {newTimeArr[len(newTimeArr)-1    ]}')
+    print(f'Точка расхождения(~"секундах"): {newTimeArr[breakPoint]}')
+    print(f'всего времени: {newTimeArr[len(newTimeArr) - 1]}')
 
 
 if __name__ == '__main__':
